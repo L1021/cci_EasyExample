@@ -96,7 +96,8 @@ void VTC_setPoolManipulation(iso_u8 u8Instance)
 
 iso_u32 Tageszaehler = 0;
 iso_u32 Gesamtzaehler = 0;
-
+iso_u32 Tagesziel = 0;
+iso_u32 Gesamtziel = 0;
 
 void VTC_handleSoftkeysAndButtons_RELEASED(const struct ButtonActivation_S *pButtonData) {
 
@@ -110,6 +111,19 @@ void VTC_handleSoftkeysAndButtons_RELEASED(const struct ButtonActivation_S *pBut
 	case Button_PlusPlus:
 		Tageszaehler++;
 		Gesamtzaehler++;
+		break;
+
+	case Button_minus:
+		Tageszaehler--;
+		break;
+
+	case Button_minusminus:
+		Gesamtzaehler--;
+	    break;
+
+	case SoftKey_minus:
+		Tageszaehler--;
+		Gesamtzaehler--;
 		break;
 
 	case SoftKey_Reset_Gesamtzaehler:
@@ -147,6 +161,17 @@ void VTC_handleNumericValues(const struct InputNumber_S * pInputNumberData) {
 		Gesamtzaehler = pInputNumberData->newValue;
 		break;
 
+	case NumberVariable_Tagesziel:
+		ESP_LOGI(TAG, "Tagesziel: %i", pInputNumberData->newValue);
+		Tagesziel = pInputNumberData->newValue;
+		setU32("CF-A", "Tagesziel", Tagesziel);
+		break;
+
+	case NumberVariable_Gesamtziel:
+		ESP_LOGI(TAG, "Gesamtziel: %i", pInputNumberData->newValue);
+		Gesamtziel = pInputNumberData->newValue;
+		setU32("CF-A", "Gesamtziel", Gesamtziel);
+		break;
 
 	default:
 		break;
@@ -175,12 +200,15 @@ void VTC_setPoolReady(iso_u8 u8Instance)
 	// Laden aus dem Spannungsausfallsicheren Speicher ins RAM
 	// STANDARD-Wert = 0; wenn nichts abgespeichert.
 	Gesamtzaehler = getU32("CF-A", "Gesamtzaehler", 0);
-
+	Tagesziel = getU32("CF-A", "Tagesziel", 0);
+	Gesamtziel = getU32("CF-A", "Gesamtziel", 0);
 
 	// Senden des Wertes der lokalen Variable Tageszaehler an die NumberVariable_Tageszaehler
 	IsoVtcCmd_NumericValue(u8Instance, NumberVariable_Tageszaehler, Tageszaehler);
 	// Senden des Wertes der lokalen Variable Gesamtzaehler an die NumberVariable_Gesamtzaehler
 	IsoVtcCmd_NumericValue(u8Instance, NumberVariable_Gesamtzaehler, Gesamtzaehler);
+	IsoVtcCmd_NumericValue(u8Instance, NumberVariable_Tagesziel, Tagesziel);
+	IsoVtcCmd_NumericValue(u8Instance, NumberVariable_Gesamtziel, Gesamtziel);
 }
 
 
